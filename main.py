@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 import warnings
-from weasyprint import HTML, CSS
+# from weasyprint import HTML, CSS
 
 from schemas import SystemInput, SystemOutput
 
@@ -304,30 +304,30 @@ Strictly `SystemOutput` schema.
         print(f"Error in analysis: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/pdf")
-async def generate_pdf(
-    html_content: str = Body(...),
-    css_content: str = Body(...)
-):
-    try:
-        # Create a PDF in memory
-        pdf_file = io.BytesIO()
+# @app.post("/api/pdf")
+# async def generate_pdf(
+#     html_content: str = Body(...),
+#     css_content: str = Body(...)
+# ):
+#     try:
+#         # Create a PDF in memory
+#         pdf_file = io.BytesIO()
         
-        # WeasyPrint conversion
-        html = HTML(string=html_content)
-        css = CSS(string=css_content)
-        html.write_pdf(target=pdf_file, stylesheets=[css])
+#         # WeasyPrint conversion
+#         html = HTML(string=html_content)
+#         css = CSS(string=css_content)
+#         html.write_pdf(target=pdf_file, stylesheets=[css])
         
-        pdf_file.seek(0)
+#         pdf_file.seek(0)
         
-        return StreamingResponse(
-            pdf_file, 
-            media_type="application/pdf",
-            headers={"Content-Disposition": "attachment; filename=Beresfords_Life_Strategy.pdf"}
-        )
-    except Exception as e:
-        print(f"PDF Generation Error: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+#         return StreamingResponse(
+#             pdf_file, 
+#             media_type="application/pdf",
+#             headers={"Content-Disposition": "attachment; filename=Beresfords_Life_Strategy.pdf"}
+#         )
+#     except Exception as e:
+#         print(f"PDF Generation Error: {str(e)}")
+#         raise HTTPException(status_code=500, detail=str(e))
 
 from langchain_core.tools import tool
 from langchain.agents import create_agent
