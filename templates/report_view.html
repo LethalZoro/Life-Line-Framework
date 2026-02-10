@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Life Plan Strategy</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Split Screen Layout */
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 65% 35%;
+            /* Left: Report, Right: Chat */
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Left Pane: Report Scrollable */
+        .report-pane {
+            overflow-y: auto;
+            background-color: #f8fafc;
+            padding: 20px;
+            border-right: 1px solid var(--border-color);
+        }
+
+        /* Right Pane: Chat Fixed */
+        .chat-pane {
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+            height: 100%;
+        }
+
+        .chat-header {
+            padding: 15px;
+            background: lightgrey;
+            color: black;
+            font-weight: bold;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chat-input-area {
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            background: #fff;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+
+        .message {
+            padding: 10px 15px;
+            border-radius: 10px;
+            max-width: 85%;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .user-msg {
+            align-self: flex-end;
+            background: lightgrey;
+            color: Black;
+        }
+
+        .bot-msg {
+            align-self: flex-start;
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        /* Report Components */
+        .summary-header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .total-badge {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--success-color);
+        }
+
+        .item-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        /* Detailed Data Table */
+        .data-table-container {
+            margin-top: 20px;
+            overflow-x: auto;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+
+        table.detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            text-align: right;
+        }
+
+        table.detail-table th,
+        table.detail-table td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        table.detail-table th {
+            background: #f8fafc;
+            color: #64748b;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        table.detail-table tr:hover {
+            background: #f8fafc;
+        }
+
+        /* Expand/Collapse Table */
+        .toggle-table {
+            cursor: pointer;
+            color: lightgrey;
+            font-size: 0.9rem;
+            text-decoration: underline;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        /* Portfolio Badges */
+        .portfolio-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .portfolio-badge.growth {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .portfolio-badge.balanced {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+
+        .portfolio-badge.conservative {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* Action Buttons */
+        .btn-secondary {
+            padding: 6px 14px;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Snapshot Bar */
+        .snapshot-bar {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 10px 0 20px;
+        }
+
+        .snapshot-bar button {
+            padding: 8px 18px;
+            border: 1px solid #64748b;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .snapshot-bar button:hover {
+            background: #f1f5f9;
+        }
+
+        /* Comparison Modal */
+        .compare-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 40px;
+        }
+
+        .compare-modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .compare-modal-content h2 {
+            margin-bottom: 20px;
+        }
+
+        .delta-positive {
+            color: #16a34a;
+            font-weight: bold;
+        }
+
+        .delta-negative {
+            color: #ef4444;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="main-layout">
+
+        <!-- LEFT: Report View -->
+        <div class="report-pane" id="report-container">
+            <!-- Dynamic Content Injected Here -->
+        </div>
+
+        <!-- RIGHT: Interactive Chat -->
+        <div class="chat-pane">
+            <div class="chat-header">Interactive Planner</div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="message bot-msg">
+                    Hello! I have your details. You can ask me to change returns, inflation, or adjust expenses.
+                    <br><br>Try: <i>"Change inflation to 5%"</i> or <i>"Fund Stage 2 starting at age 55"</i>.
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chat-input" placeholder="Type a command..."
+                    onkeydown="if(event.key==='Enter') sendMessage()">
+                <button class="btn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Initial Data Injection -->
+    <script>
+        // State
+        let currentScenario = {{ scenario_json | safe }};
+        let currentResults = {{ results | tojson }};
+        let currentTotal = {{ total_capital }};
+        let profile = {{ profile | tojson }};
+        let assumptions = currentScenario.assumptions || {};
+        let displayMode = "{{ display_mode | default('charts') }}";
+        let chartInstances = {};
+        let children = profile.children || [];
+
+        function formatCurrency(val) {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
+        }
+
+        function formatPercent(val) {
+            return val.toFixed(1) + '%';
+        }
+
+        // --- Renderer ---
+        function renderReport() {
+            // Cleanup old charts
+            Object.values(chartInstances).forEach(chart => chart.destroy());
+            chartInstances = {};
+
+            const container = document.getElementById('report-container');
+            container.innerHTML = ''; // clear
+
+            // 0. Assumptions Summary Panel
+            const assumptionsPanel = document.createElement('div');
+            assumptionsPanel.className = 'summary-header';
+            assumptionsPanel.style.marginBottom = '20px';
+            assumptionsPanel.innerHTML = `
+                <h3 style="margin-bottom:10px;">Current Assumptions</h3>
+                <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap;">
+                    <div><strong>Income Return:</strong> ${formatPercent(assumptions.income_return || 0)}</div>
+                    <div><strong>Growth Return:</strong> ${formatPercent(assumptions.growth_return || 0)}</div>
+                    <div><strong>Inflation:</strong> ${formatPercent(assumptions.inflation || 0)}</div>
+                    <div><strong>Tax Rate:</strong> ${formatPercent(assumptions.tax_rate || 0)}</div>
+                    <div><strong>Fee Load:</strong> ${formatPercent(assumptions.fee_load || 0)}</div>
+                </div>
+            `;
+            container.appendChild(assumptionsPanel);
+
+            // 1. Header
+            const header = document.createElement('div');
+            header.className = 'summary-header';
+            header.innerHTML = `
+            <h2>Life Plan Strategy</h2>
+            <p>Prepared for ${profile.p1_name} & ${profile.p2_name}</p>
+            <div>
+                <span>Total Capital Required</span>
+                <div class="total-badge">${formatCurrency(currentTotal)}</div>
+            </div>
+        `;
+            container.appendChild(header);
+
+            // Snapshot / Compare Bar
+            const snapBar = document.createElement('div');
+            snapBar.className = 'snapshot-bar';
+            snapBar.innerHTML = `
+                <button onclick="saveSnapshot()">💾 Save Snapshot</button>
+                <button onclick="showCompare()">📊 Compare Reports</button>
+            `;
+            container.appendChild(snapBar);
+
+            // 2. Loop Items
+            currentResults.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'item-card';
+
+                // Title & Details with Portfolio Badge
+                const portfolioBadge = item.portfolio_used ?
+                    `<span class="portfolio-badge ${item.portfolio_used}">${item.portfolio_used}</span>` : '';
+                const itemReturns = item.item_returns || assumptions;
+
+                // Child ages header columns
+                const childrenData = item.chart_data.children || [];
+                const childAgeHeaders = childrenData.map(c => `<th>${c.name}</th>`).join('');
+
+                card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3>${item.title} ${portfolioBadge}</h3>
+                    <span style="font-weight:bold; color:var(--accent-color); font-size:1.2rem;">${formatCurrency(item.capital_required)}</span>
+                </div>
+                
+                <!-- Per-Item Returns Display -->
+                <div style="display:flex; gap:12px; margin:6px 0; font-size:0.78rem; color:#64748b;">
+                    <span>Income: ${formatPercent(itemReturns.income_return || 0)}</span>
+                    <span>Growth: ${formatPercent(itemReturns.growth_return || 0)}</span>
+                    <span>Tax: ${formatPercent(itemReturns.tax_rate || 0)}</span>
+                    <span>Fees: ${formatPercent(itemReturns.fee_load || 0)}</span>
+                </div>
+                
+                <!-- Interactive Controls -->
+                <div class="interactive-controls" style="background:rgba(0,0,0,0.03); padding:10px; border-radius:6px; margin:10px 0; display:flex; gap:15px; align-items:center;">
+                    <label style="font-size:0.8rem; font-weight:bold;">Start Age:</label>
+                    <input type="number" value="${item.details.match(/Start Age (\d+)/) ? item.details.match(/Start Age (\d+)/)[1] : ''}" 
+                           style="width:60px; padding:4px;" 
+                           onchange="updateScenarioItem(${index}, 'start', this.value)">
+                           
+                    <label style="font-size:0.8rem; font-weight:bold;">End Age:</label>
+                    <input type="number" value="${item.details.match(/End Age (\d+)/) ? item.details.match(/End Age (\d+)/)[1] : ''}" 
+                           style="width:60px; padding:4px;" 
+                           onchange="updateScenarioItem(${index}, 'end', this.value)">
+                           
+                    <button class="btn-secondary" style="font-size:0.75rem; padding:4px 8px;" onclick="updateScenarioItem(${index}, 'funding_start', 'now')">Fund Now</button>
+                </div>
+                
+                <p style="color:var(--text-secondary); margin-bottom:15px;">${item.details}</p>
+                
+                <!-- Chart -->
+                <div class="chart-container" style="${displayMode === 'tables' ? 'display:none;' : ''}">
+                    <canvas id="chart-${index}"></canvas>
+                </div>
+
+                <!-- Table Toggle -->
+                <span class="toggle-table" onclick="toggleTable('table-${index}')">${displayMode === 'tables' ? 'Hide Table' : 'Show Detailed Table'}</span>
+
+                <!-- Table with per-item returns + child ages -->
+                <div id="table-${index}" class="data-table-container" style="${displayMode === 'tables' ? '' : 'display:none;'}">
+                        <table class="detail-table">
+                        <thead>
+                            <tr>
+                                <th>Year</th>
+                                <th>P1 Age</th>
+                                <th>P2 Age</th>
+                                ${childAgeHeaders}
+                                <th>Opening</th>
+                                <th>Income (${formatPercent(itemReturns.income_return || 0)})</th>
+                                <th>Tax (${formatPercent(itemReturns.tax_rate || 0)})</th>
+                                <th>Net Income</th>
+                                <th>Growth (${formatPercent(itemReturns.growth_return || 0)})</th>
+                                <th>Fees (${formatPercent(itemReturns.fee_load || 0)})</th>
+                                ${item.chart_data.table_data.some(row => row['Trade-In Value']) ? '<th>Trade-in</th>' : ''}
+                                <th>Drawdown</th>
+                                <th>Closing</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${item.chart_data.table_data.map(row => {
+                    const opening = row['Opening Balance'] || 0;
+                    const closing = row['Closing Balance'] || 0;
+                    const tradeIn = row['Trade-In Value'] || 0;
+                    const hasTradeIn = item.chart_data.table_data.some(r => r['Trade-In Value']);
+                    const openingColor = opening >= 0 ? '#10b981' : '#ef4444';
+                    const closingColor = closing >= 0 ? '#10b981' : '#ef4444';
+                    // Child age columns
+                    const childAgeCells = childrenData.map(c => {
+                        const childAge = row.Year - c.birth_year;
+                        return `<td style="color:#94a3b8;">${childAge >= 0 ? childAge : '-'}</td>`;
+                    }).join('');
+
+                    return `
+                                <tr>
+                                    <td>${row.Year}</td>
+                                    <td style="color:var(--text-secondary);">${row['P1 Age'] !== null && row['P1 Age'] !== undefined ? row['P1 Age'] : ''}</td>
+                                    <td style="color:var(--text-secondary);">${row['P2 Age'] !== null && row['P2 Age'] !== undefined ? row['P2 Age'] : ''}</td>
+                                    ${childAgeCells}
+                                    <td style="color:${openingColor}; font-weight:600;">${formatCurrency(opening)}</td>
+                                    <td style="color:#10b981; font-weight:bold;">+${formatCurrency(row['Income Return'] || 0)}</td>
+                                    <td style="color:#ef4444; font-weight:bold;">-${formatCurrency(row['Tax'] || 0)}</td>
+                                    <td style="color:#10b981; font-weight:600;">${formatCurrency(row['Income Net'] || 0)}</td>
+                                    <td style="color:#10b981; font-weight:bold;">+${formatCurrency(row['Growth'] || 0)}</td>
+                                    <td style="color:#94a3b8; font-weight:600;">-${formatCurrency(row['Fees'] || 0)}</td>
+                                    ${hasTradeIn ? `<td style="color:${tradeIn > 0 ? '#10b981' : '#6b7280'}; font-weight:${tradeIn > 0 ? 'bold' : 'normal'};">+${formatCurrency(tradeIn)}</td>` : ''}
+                                    <td style="color:#ef4444; font-weight:bold;">-${formatCurrency(row['Drawdown'] || 0)}</td>
+                                    <td style="color:${closingColor}; font-weight:bold; font-size:1.05em;">${formatCurrency(closing)}</td>
+                                </tr>
+                            `}).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                    `;
+                container.appendChild(card);
+
+                // Render Chart
+                renderChart(`chart-${index}`, item.chart_data, item.title);
+            });
+        }
+
+        function renderChart(canvasId, data, title) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+
+            // Destroy existing if somehow conflicting (though we cleared registry)
+            if (chartInstances[canvasId]) {
+                chartInstances[canvasId].destroy();
+            }
+
+            chartInstances[canvasId] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [
+                        {
+                            label: 'Balance',
+                            data: data.balance,
+                            borderColor: '#38bdf8',
+                            backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Expense/Drawdown',
+                            data: data.drawdown,
+                            borderColor: '#ef4444',
+                            borderDash: [5, 5],
+                            borderWidth: 1,
+                            fill: false,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false, // Disable animation for instant updates
+                    plugins: {
+                        legend: { labels: { color: '#64748b' } }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#64748b', maxTicksLimit: 10 },
+                            grid: { color: '#f1f5f9' }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#64748b',
+                                callback: (val) => '$' + val / 1000 + 'k'
+                            },
+                            grid: { color: '#f1f5f9' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function toggleTable(id) {
+            const table = document.getElementById(id);
+            const isHidden = table.style.display === 'none';
+            table.style.display = isHidden ? 'block' : 'none';
+        }
+
+        // --- Interactive Chat ---
+        let chatHistory = []; // Maintains conversation context
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            // UI User Message
+            addMessage(text, 'user-msg');
+            input.value = '';
+
+            // API Call with chat history
+            try {
+                const resp = await fetch(`${window.location.origin}/api/chat_interactive`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: text,
+                        scenario: currentScenario,
+                        chat_history: chatHistory.slice(-20) // Keep last 20 messages for context
+                    })
+                });
+                const data = await resp.json();
+
+                // Store in chat history for future context
+                chatHistory.push({ role: 'user', content: text });
+                chatHistory.push({ role: 'assistant', content: data.reply });
+
+                // Handle Response
+                addMessage(data.reply, 'bot-msg');
+
+                if (data.new_results) {
+                    // Update State
+                    currentResults = data.new_results;
+                    currentScenario = data.new_scenario;
+                    currentTotal = data.new_total;
+                    assumptions = currentScenario.assumptions || assumptions;
+
+                    // Re-Render Report
+                    renderReport();
+                }
+            } catch (e) {
+                console.error(e);
+                addMessage("Error processing command.", 'bot-msg');
+            }
+        }
+
+        function addMessage(text, className) {
+            const container = document.getElementById('chat-messages');
+            const d = document.createElement('div');
+            d.className = `message ${className} `;
+            d.innerHTML = text.replace(/\n/g, '<br>');
+            container.appendChild(d);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Direct Item Update via "Interactive Controls"
+        async function updateScenarioItem(index, field, value) {
+            // We can reuse the chat interactive endpoint by constructing a specific "System Command"
+            // Or ideally, we should have a structured endpoint.
+            // For now, let's start a chat message that describes the action clearly for the LLM.
+
+            let itemTitle = currentResults[index].title; // e.g., "Income Stream: Stage 1"
+            let itemName = itemTitle.split(": ")[1];
+
+            let command = "";
+            if (value === 'now') {
+                command = `Update ${itemName}: set funding_start to current age`;
+            } else {
+                command = `Update ${itemName}: set ${field} to ${value}`;
+            }
+
+            // Send this "invisible" command to the chat
+            // We can optionally show it in the chat or just process it.
+            // Let's show it so the user sees the confirmation.
+
+            const input = document.getElementById('chat-input');
+            input.value = command;
+            sendMessage();
+        }
+
+        // Init
+        renderReport();
+
+        // --- Snapshot & Compare ---
+        function saveSnapshot() {
+            const snapshots = JSON.parse(localStorage.getItem('lifelineSnapshots') || '[]');
+            const label = prompt('Name this snapshot:', `Scenario ${snapshots.length + 1}`);
+            if (!label) return;
+            snapshots.push({
+                label: label,
+                timestamp: new Date().toISOString(),
+                results: currentResults,
+                total: currentTotal,
+                assumptions: { ...assumptions }
+            });
+            localStorage.setItem('lifelineSnapshots', JSON.stringify(snapshots));
+            alert(`Snapshot "${label}" saved! (${snapshots.length} total)`);
+        }
+
+        function showCompare() {
+            const snapshots = JSON.parse(localStorage.getItem('lifelineSnapshots') || '[]');
+            if (snapshots.length === 0) {
+                alert('No snapshots saved yet. Click "Save Snapshot" first.');
+                return;
+            }
+            // Build modal
+            let modal = document.getElementById('compare-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'compare-modal';
+                modal.className = 'compare-modal';
+                document.body.appendChild(modal);
+            }
+            modal.style.display = 'block';
+
+            let listHtml = snapshots.map((s, i) =>
+                `<button onclick="compareWith(${i})" style="display:block; width:100%; text-align:left; padding:10px; margin:5px 0; border:1px solid #e2e8f0; border-radius:6px; background:white; cursor:pointer;">
+                    <strong>${s.label}</strong> — ${formatCurrency(s.total)} — <small>${new Date(s.timestamp).toLocaleString()}</small>
+                </button>`
+            ).join('');
+
+            modal.innerHTML = `
+                <div class="compare-modal-content">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h2>Compare With Snapshot</h2>
+                        <button onclick="document.getElementById('compare-modal').style.display='none'" style="border:none; background:none; font-size:1.5rem; cursor:pointer;">✕</button>
+                    </div>
+                    <p style="color:#64748b; margin-bottom:15px;">Current total: <strong>${formatCurrency(currentTotal)}</strong>. Select a snapshot to compare:</p>
+                    ${listHtml}
+                    <div id="compare-results" style="margin-top:20px;"></div>
+                    <button onclick="clearSnapshots()" style="margin-top:15px; padding:6px 14px; background:#ef4444; color:white; border:none; border-radius:6px; cursor:pointer; font-size:0.85rem;">Clear All Snapshots</button>
+                </div>
+            `;
+        }
+
+        function compareWith(snapshotIndex) {
+            const snapshots = JSON.parse(localStorage.getItem('lifelineSnapshots') || '[]');
+            const snap = snapshots[snapshotIndex];
+            const container = document.getElementById('compare-results');
+
+            let rows = '';
+            const maxLen = Math.max(currentResults.length, snap.results.length);
+            for (let i = 0; i < maxLen; i++) {
+                const current = currentResults[i];
+                const old = snap.results[i];
+                const cTitle = current ? current.title : '—';
+                const oTitle = old ? old.title : '—';
+                const cCap = current ? current.capital_required : 0;
+                const oCap = old ? old.capital_required : 0;
+                const delta = cCap - oCap;
+                const deltaClass = delta > 0 ? 'delta-negative' : (delta < 0 ? 'delta-positive' : '');
+                rows += `<tr>
+                    <td>${cTitle}</td>
+                    <td style="text-align:right;">${formatCurrency(oCap)}</td>
+                    <td style="text-align:right;">${formatCurrency(cCap)}</td>
+                    <td style="text-align:right;" class="${deltaClass}">${delta >= 0 ? '+' : ''}${formatCurrency(delta)}</td>
+                </tr>`;
+            }
+            const totalDelta = currentTotal - snap.total;
+            const totalDeltaClass = totalDelta > 0 ? 'delta-negative' : (totalDelta < 0 ? 'delta-positive' : '');
+
+            container.innerHTML = `
+                <h3 style="margin-bottom:10px;">Current vs "${snap.label}"</h3>
+                <table class="detail-table" style="text-align:left;">
+                    <thead><tr><th style="text-align:left;">Item</th><th>Snapshot</th><th>Current</th><th>Delta</th></tr></thead>
+                    <tbody>${rows}
+                        <tr style="border-top:2px solid #333; font-weight:bold;">
+                            <td>TOTAL</td>
+                            <td style="text-align:right;">${formatCurrency(snap.total)}</td>
+                            <td style="text-align:right;">${formatCurrency(currentTotal)}</td>
+                            <td style="text-align:right;" class="${totalDeltaClass}">${totalDelta >= 0 ? '+' : ''}${formatCurrency(totalDelta)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function clearSnapshots() {
+            if (confirm('Delete all saved snapshots?')) {
+                localStorage.removeItem('lifelineSnapshots');
+                document.getElementById('compare-modal').style.display = 'none';
+            }
+        }
+
+    </script>
+</body>
+
+</html>

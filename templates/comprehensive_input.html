@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life-First Comprehensive Planner</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .toggle-btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .toggle-btn.active {
+            background: var(--accent-color);
+            color: #000;
+            font-weight: bold;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        /* Compact layout for inputs */
+        .compact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Life-First Financial Input</h1>
+            <p>Comprehensive Planning Engine</p>
+        </header>
+
+        <form id="planForm" onsubmit="event.preventDefault(); generateReport();">
+
+            <!-- Display Mode Toggle -->
+            <div class="section-card"
+                style="background: linear-gradient(135deg, var(--card-bg), rgba(14,165,233,0.05));">
+                <h2>Display Options</h2>
+                <div class="form-group">
+                    <label>Report View Mode</label>
+                    <div class="toggle-btn-group">
+                        <div class="toggle-btn" id="mode_charts" onclick="setDisplayMode('charts')">Charts +
+                            Tables</div>
+                        <div class="toggle-btn active" id="mode_tables" onclick="setDisplayMode('tables')">Tables Only
+                        </div>
+                    </div>
+                    <small style="color:var(--text-secondary); margin-top:5px; display:block;">
+                        "Tables Only" will hide charts and auto-expand all detailed tables.
+                    </small>
+                </div>
+            </div>
+
+            <!-- 1. Client Profile -->
+            <div class="section-card">
+                <h2>1. Client Profile</h2>
+
+                <!-- Partner 1 Row -->
+                <div class="form-grid" style="margin-bottom: 15px;">
+                    <div class="form-group">
+                        <label>Partner 1 Name</label>
+                        <input type="text" id="p1_name" value="Client 1">
+                    </div>
+                    <div class="form-group">
+                        <label>Date of Birth</label>
+                        <input type="date" id="p1_dob" value="1980-01-01" onchange="calculateAgeFromDOB('p1')">
+                    </div>
+                    <div class="form-group">
+                        <label>Age</label>
+                        <input type="number" id="p1_age" placeholder="Auto" onchange="calculateDOBFromAge('p1')">
+                    </div>
+                </div>
+
+                <!-- Partner 2 Row -->
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Partner 2 Name</label>
+                        <input type="text" id="p2_name" value="Client 2">
+                    </div>
+                    <div class="form-group">
+                        <label>Date of Birth</label>
+                        <input type="date" id="p2_dob" value="1982-06-15" onchange="calculateAgeFromDOB('p2')">
+                    </div>
+                    <div class="form-group">
+                        <label>Age</label>
+                        <input type="number" id="p2_age" placeholder="Auto" onchange="calculateDOBFromAge('p2')">
+                    </div>
+                </div>
+
+                <!-- Children -->
+                <hr style="border-color: var(--border-color); margin: 20px 0;">
+                <div class="section-header">
+                    <h3>Children</h3>
+                    <button type="button" class="btn" style="padding:4px 12px; font-size:0.85rem;"
+                        onclick="addChild()">+ Add Child</button>
+                </div>
+                <div id="children-list">
+                    <!-- Dynamic children entries go here -->
+                </div>
+            </div>
+
+            <!-- 2. Global Assumptions & Portfolio -->
+            <div class="section-card">
+                <h2>2. Assumptions & Portfolio</h2>
+
+                <div class="form-group">
+                    <label>Portfolio Strategy</label>
+                    <div class="toggle-btn-group">
+                        <div class="toggle-btn" onclick="setPortfolio('conservative')">Conservative</div>
+                        <div class="toggle-btn active" onclick="setPortfolio('balanced')">Balanced</div>
+                        <div class="toggle-btn" onclick="setPortfolio('growth')">Growth</div>
+                    </div>
+                </div>
+
+                <div class="compact-grid">
+                    <div class="form-group">
+                        <label>Income Return %</label>
+                        <input type="number" step="0.01" id="income_return" value="3.5">
+                    </div>
+                    <div class="form-group">
+                        <label>Growth Return %</label>
+                        <input type="number" step="0.01" id="growth_return" value="4.5">
+                    </div>
+                    <div class="form-group">
+                        <label>Tax Rate %</label>
+                        <input type="number" step="0.01" id="tax_rate" value="15.0">
+                    </div>
+                    <div class="form-group">
+                        <label>Tax-Free After Age</label>
+                        <input type="number" id="tax_free_age" value="65">
+                        <small style="color:var(--text-secondary)">Tax drops to 0% after this age</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Inflation %</label>
+                        <input type="number" step="0.01" id="inflation" value="3.0">
+                    </div>
+                    <div class="form-group">
+                        <label>Fee Load %</label>
+                        <input type="number" step="0.01" id="fee_load" value="1.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Universal Fund-From Age</label>
+                        <input type="number" id="universal_fund_age" placeholder="Optional" value="60"
+                            onchange="syncUniversalFundAge(this.value)">
+                        <small style="color:var(--text-secondary)">Overrides all individual fund-from ages when
+                            set</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Income Stages -->
+            <div class="section-card">
+                <h2>3. Income Stages (Drawdown)</h2>
+                <div class="dynamic-list">
+                    <!-- Stage 1 -->
+                    <div class="dynamic-item">
+                        <h4>Stage 1: Active Lifestyle</h4>
+                        <div class="compact-grid">
+                            <div class="form-group">
+                                <label>Net Income Needed ($/yr)</label>
+                                <input type="number" id="stage1_income" value="80000">
+                            </div>
+                            <div class="form-group">
+                                <label>Start Age (P1)</label>
+                                <input type="number" id="stage1_start" value="60">
+                            </div>
+                            <div class="form-group">
+                                <label>End Age (P1)</label>
+                                <input type="number" id="stage1_end" value="70">
+                            </div>
+                            <div class="form-group">
+                                <label>Fund From Age</label>
+                                <input type="number" id="stage1_fund" value="60">
+                                <small style="color:var(--text-secondary)">When to start saving?</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Portfolio</label>
+                                <select id="stage1_portfolio">
+                                    <option value="">Auto (by duration)</option>
+                                    <option value="conservative">Conservative</option>
+                                    <option value="balanced">Balanced</option>
+                                    <option value="growth">Growth</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Stage 2 -->
+                    <div class="dynamic-item">
+                        <h4>Stage 2: Slowing Down</h4>
+                        <div class="compact-grid">
+                            <div class="form-group">
+                                <label>Net Income Needed ($/yr)</label>
+                                <input type="number" id="stage2_income" value="60000">
+                            </div>
+                            <div class="form-group">
+                                <label>Start Age (P1)</label>
+                                <input type="number" id="stage2_start" value="70">
+                            </div>
+                            <div class="form-group">
+                                <label>End Age (P1)</label>
+                                <input type="number" id="stage2_end" value="85">
+                            </div>
+                            <div class="form-group">
+                                <label>Fund From Age</label>
+                                <input type="number" id="stage2_fund" value="70">
+                            </div>
+                            <div class="form-group">
+                                <label>Portfolio</label>
+                                <select id="stage2_portfolio">
+                                    <option value="">Auto (by duration)</option>
+                                    <option value="conservative">Conservative</option>
+                                    <option value="balanced">Balanced</option>
+                                    <option value="growth">Growth</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Stage 3 -->
+                    <div class="dynamic-item">
+                        <h4>Stage 3: Late Life</h4>
+                        <div class="compact-grid">
+                            <div class="form-group">
+                                <label>Net Income Needed ($/yr)</label>
+                                <input type="number" id="stage3_income" value="50000">
+                            </div>
+                            <div class="form-group">
+                                <label>Start Age (P1)</label>
+                                <input type="number" id="stage3_start" value="85">
+                            </div>
+                            <div class="form-group">
+                                <label>End Age (P1)</label>
+                                <input type="number" id="stage3_end" value="100">
+                            </div>
+                            <div class="form-group">
+                                <label>Fund From Age</label>
+                                <input type="number" id="stage3_fund" value="85">
+                            </div>
+                            <div class="form-group">
+                                <label>Portfolio</label>
+                                <select id="stage3_portfolio">
+                                    <option value="">Auto (by duration)</option>
+                                    <option value="conservative">Conservative</option>
+                                    <option value="balanced">Balanced</option>
+                                    <option value="growth">Growth</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Vehicles -->
+            <div class="section-card">
+                <h2>4. Vehicles</h2>
+                <div class="dynamic-list">
+                    <div class="dynamic-item">
+                        <h4>Car 1 (Primary)</h4>
+                        <div class="compact-grid">
+                            <div class="form-group">
+                                <label>Purchase Cost ($)</label>
+                                <input type="number" id="car1_cost" value="60000">
+                            </div>
+                            <div class="form-group">
+                                <label>Start Age</label>
+                                <input type="number" id="car1_start" value="60">
+                            </div>
+                            <div class="form-group">
+                                <label>Cycle (Years)</label>
+                                <input type="number" id="car1_cycle" value="5">
+                            </div>
+                            <div class="form-group">
+                                <label>Holding Cost ($/yr)</label>
+                                <input type="number" id="car1_holding" value="2500">
+                            </div>
+                            <div class="form-group">
+                                <label>Apply Inflation?</label>
+                                <select id="car1_inflation">
+                                    <option value="true">Yes</option>
+                                    <option value="false">No</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Trade-in Value ($)</label>
+                                <input type="number" id="car1_tradein" value="15000">
+                            </div>
+                            <div class="form-group">
+                                <label>Portfolio</label>
+                                <select id="car1_portfolio">
+                                    <option value="">Auto (by duration)</option>
+                                    <option value="conservative">Conservative</option>
+                                    <option value="balanced">Balanced</option>
+                                    <option value="growth">Growth</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dynamic-item">
+                        <h4>Car 2 (Secondary)</h4>
+                        <div class="compact-grid">
+                            <div class="form-group">
+                                <label>Purchase Cost ($)</label>
+                                <input type="number" id="car2_cost" value="40000">
+                            </div>
+                            <div class="form-group">
+                                <label>Start Age</label>
+                                <input type="number" id="car2_start" value="60">
+                            </div>
+                            <div class="form-group">
+                                <label>Cycle (Years)</label>
+                                <input type="number" id="car2_cycle" value="7">
+                            </div>
+                            <div class="form-group">
+                                <label>Holding Cost ($/yr)</label>
+                                <input type="number" id="car2_holding" value="1500">
+                            </div>
+                            <div class="form-group">
+                                <label>Apply Inflation?</label>
+                                <select id="car2_inflation">
+                                    <option value="true">Yes</option>
+                                    <option value="false">No</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Trade-in Value ($)</label>
+                                <input type="number" id="car2_tradein" value="10000">
+                            </div>
+                            <div class="form-group">
+                                <label>Portfolio</label>
+                                <select id="car2_portfolio">
+                                    <option value="">Auto (by duration)</option>
+                                    <option value="conservative">Conservative</option>
+                                    <option value="balanced">Balanced</option>
+                                    <option value="growth">Growth</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Major Assets (Toys) -->
+            <div class="section-card">
+                <h2>5. Major Assets</h2>
+                <div class="dynamic-list">
+                    <div class="dynamic-item">
+                        <h4>Boat</h4>
+                        <div class="compact-grid">
+                            <div class="form-group">
+                                <label>Purchase Cost ($)</label>
+                                <input type="number" id="boat_cost" value="80000">
+                            </div>
+                            <div class="form-group">
+                                <label>Purchase Age</label>
+                                <input type="number" id="boat_start" value="62">
+                            </div>
+                            <div class="form-group">
+                                <label>Disposal Age</label>
+                                <input type="number" id="boat_end" value="75">
+                            </div>
+                            <div class="form-group">
+                                <label>Trade-in Value ($)</label>
+                                <input type="number" id="boat_resale" value="30000">
+                            </div>
+                            <div class="form-group">
+                                <label>Holding Cost ($/yr)</label>
+                                <input type="number" id="boat_holding" value="3000">
+                            </div>
+                            <div class="form-group">
+                                <label>Fund From Age</label>
+                                <input type="number" id="boat_fund" value="62">
+                            </div>
+                            <div class="form-group">
+                                <label>Portfolio</label>
+                                <select id="boat_portfolio">
+                                    <option value="">Auto (by duration)</option>
+                                    <option value="conservative">Conservative</option>
+                                    <option value="balanced">Balanced</option>
+                                    <option value="growth">Growth</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dynamic-item">
+                        <h4>Caravan</h4>
+                        <div class="compact-grid">
+                            <div class="form-group">
+                                <label>Purchase Cost ($)</label>
+                                <input type="number" id="caravan_cost" value="0"> <!-- Default 0 to not force it -->
+                            </div>
+                            <div class="form-group">
+                                <label>Purchase Age</label>
+                                <input type="number" id="caravan_start" value="65">
+                            </div>
+                            <div class="form-group">
+                                <label>Disposal Age</label>
+                                <input type="number" id="caravan_end" value="80">
+                            </div>
+                            <div class="form-group">
+                                <label>Trade-in Value ($)</label>
+                                <input type="number" id="caravan_resale" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Holding Cost ($/yr)</label>
+                                <input type="number" id="caravan_holding" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Fund From Age</label>
+                                <input type="number" id="caravan_fund" value="65">
+                            </div>
+                            <div class="form-group">
+                                <label>Portfolio</label>
+                                <select id="caravan_portfolio">
+                                    <option value="">Auto (by duration)</option>
+                                    <option value="conservative">Conservative</option>
+                                    <option value="balanced">Balanced</option>
+                                    <option value="growth">Growth</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Travel & Lifestyle -->
+            <div class="section-card">
+                <h2>6. Travel & Lifestyle</h2>
+                <div class="dynamic-item">
+                    <h4>Domestic Travel</h4>
+                    <div class="compact-grid">
+                        <div class="form-group">
+                            <label>Annual Cost ($/yr)</label>
+                            <input type="number" id="travel_dom_cost" value="10000">
+                        </div>
+                        <div class="form-group">
+                            <label>Years Between Trips</label>
+                            <input type="number" id="travel_dom_cycle" value="1" min="1" max="10"
+                                title="1=Annual, 2=Every 2 years, etc.">
+                        </div>
+                        <div class="form-group" id="travel_dom_freq_container" style="display:block;">
+                            <label>Trips per Year (if annual)</label>
+                            <input type="number" id="travel_dom_freq" value="2" min="1" max="50">
+                        </div>
+                        <div class="form-group">
+                            <label>Total Duration (Age 60 to X)</label>
+                            <input type="number" id="travel_dom_end" value="80">
+                        </div>
+                    </div>
+                </div>
+                <hr style="border-color: var(--border-color); margin: 15px 0;">
+                <div class="dynamic-item">
+                    <h4>International Travel</h4>
+                    <div class="compact-grid">
+                        <div class="form-group">
+                            <label>Annual Cost ($/yr)</label>
+                            <input type="number" id="travel_int_cost" value="25000">
+                        </div>
+                        <div class="form-group">
+                            <label>Years Between Trips</label>
+                            <input type="number" id="travel_int_cycle" value="1" min="1" max="10"
+                                title="1=Annual, 2=Every 2 years, etc.">
+                        </div>
+                        <div class="form-group" id="travel_int_freq_container" style="display:block;">
+                            <label>Trips per Year (if annual)</label>
+                            <input type="number" id="travel_int_freq" value="1" min="1" max="20">
+                        </div>
+                        <div class="form-group">
+                            <label>Total Duration (Age 60 to X)</label>
+                            <input type="number" id="travel_int_end" value="75">
+                        </div>
+                    </div>
+                </div>
+                <hr style="border-color: var(--border-color); margin: 15px 0;">
+                <div class="compact-grid">
+                    <div class="form-group">
+                        <label>Travel to Parents ($/yr)</label>
+                        <input type="number" id="travel_par_cost" value="5000">
+                    </div>
+                    <div class="form-group">
+                        <label>Duration (Years)</label>
+                        <input type="number" id="travel_par_dur" value="10">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. Medical -->
+            <div class="section-card">
+                <h2>7. Medical & Health</h2>
+                <div class="compact-grid">
+                    <div class="form-group">
+                        <label>Medical Buffer/Cost ($/yr)</label>
+                        <input type="number" id="med_cost" value="6000">
+                    </div>
+                    <div class="form-group">
+                        <label>Start Age</label>
+                        <input type="number" id="med_start" value="70">
+                    </div>
+                    <div class="form-group">
+                        <label>End Age</label>
+                        <input type="number" id="med_end" value="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Portfolio</label>
+                        <select id="med_portfolio">
+                            <option value="">Auto (by duration)</option>
+                            <option value="conservative">Conservative</option>
+                            <option value="balanced">Balanced</option>
+                            <option value="growth">Growth</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 40px;">
+                <button type="submit" class="btn" style="padding: 15px 40px; font-size: 1.2rem;">CALCULATE
+                    LIFELINE</button>
+            </div>
+
+        </form>
+    </div>
+
+    <script>
+        function setPortfolio(type) {
+            // Update UI
+            document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Set Values
+            if (type === 'conservative') {
+                document.getElementById('income_return').value = 4.5;
+                document.getElementById('growth_return').value = 0.5;
+            } else if (type === 'balanced') {
+                document.getElementById('income_return').value = 3.5;
+                document.getElementById('growth_return').value = 4.5;
+            } else if (type === 'growth') {
+                document.getElementById('income_return').value = 2.5;
+                document.getElementById('growth_return').value = 6.5;
+            }
+        }
+
+        // Display Mode State (Global)
+        let displayMode = 'tables'; // Default
+
+        function setDisplayMode(mode) {
+            displayMode = mode;
+            document.getElementById('mode_charts').classList.remove('active');
+            document.getElementById('mode_tables').classList.remove('active');
+            document.getElementById('mode_' + mode).classList.add('active');
+        }
+
+        async function generateReport() {
+            const btn = document.querySelector('button[type="submit"]');
+            btn.textContent = "Calculating...";
+            btn.disabled = true;
+
+            const getValue = (id) => {
+                const el = document.getElementById(id);
+                if (!el) return 0;
+                const val = el.value;
+                return val ? parseFloat(val) : 0;
+            };
+            const getText = (id) => {
+                const el = document.getElementById(id);
+                return el ? el.value : '';
+            };
+            const getBool = (id) => {
+                const el = document.getElementById(id);
+                return el ? (el.value === 'true') : true;
+            };
+
+            // Collect children
+            const children = [];
+            document.querySelectorAll('.child-entry').forEach(entry => {
+                const name = entry.querySelector('.child-name').value;
+                const dob = entry.querySelector('.child-dob').value;
+                if (name && dob) children.push({ name, dob });
+            });
+
+            const getSelect = (id) => {
+                const el = document.getElementById(id);
+                return el ? (el.value || null) : null;
+            };
+            const getOptional = (id) => {
+                const el = document.getElementById(id);
+                if (!el || !el.value) return null;
+                return parseFloat(el.value);
+            };
+
+            // Construct Payload
+            const payload = {
+                profile: {
+                    p1_name: getText('p1_name'),
+                    p1_dob: getText('p1_dob'),
+                    p2_name: getText('p2_name'),
+                    p2_dob: getText('p2_dob'),
+                    children: children
+                },
+                assumptions: {
+                    income_return: getValue('income_return'),
+                    growth_return: getValue('growth_return'),
+                    tax_rate: getValue('tax_rate'),
+                    inflation: getValue('inflation'),
+                    fee_load: getValue('fee_load'),
+                    tax_free_age: getOptional('tax_free_age')
+                },
+                universal_fund_age: getOptional('universal_fund_age'),
+                incomes: [
+                    { name: "Stage 1", income: getValue('stage1_income'), start: getValue('stage1_start'), end: getValue('stage1_end'), funding_start: getValue('stage1_fund'), portfolio: getSelect('stage1_portfolio') },
+                    { name: "Stage 2", income: getValue('stage2_income'), start: getValue('stage2_start'), end: getValue('stage2_end'), funding_start: getValue('stage2_fund'), portfolio: getSelect('stage2_portfolio') },
+                    { name: "Stage 3", income: getValue('stage3_income'), start: getValue('stage3_start'), end: getValue('stage3_end'), funding_start: getValue('stage3_fund'), portfolio: getSelect('stage3_portfolio') }
+                ],
+                cars: [
+                    { name: getText('p1_name') + " Car", cost: getValue('car1_cost'), start: getValue('car1_start'), cycle: getValue('car1_cycle'), holding: getValue('car1_holding'), tradein: getValue('car1_tradein'), apply_inflation: getBool('car1_inflation'), portfolio: getSelect('car1_portfolio') },
+                    { name: getText('p2_name') + " Car", cost: getValue('car2_cost'), start: getValue('car2_start'), cycle: getValue('car2_cycle'), holding: getValue('car2_holding'), tradein: getValue('car2_tradein'), apply_inflation: getBool('car2_inflation'), portfolio: getSelect('car2_portfolio') }
+                ],
+                assets: [
+                    { name: "Boat", cost: getValue('boat_cost'), start: getValue('boat_start'), end: getValue('boat_end'), holding: getValue('boat_holding'), resale: getValue('boat_resale'), funding_start: getValue('boat_fund'), portfolio: getSelect('boat_portfolio') },
+                    { name: "Caravan", cost: getValue('caravan_cost'), start: getValue('caravan_start'), end: getValue('caravan_end'), holding: getValue('caravan_holding'), resale: getValue('caravan_resale'), funding_start: getValue('caravan_fund'), portfolio: getSelect('caravan_portfolio') }
+                ],
+                travel: [
+                    { name: "Domestic Travel", cost: getValue('travel_dom_cost'), start: 60, end: getValue('travel_dom_end'), type: "annual" },
+                    { name: "International", cost: getValue('travel_int_cost'), start: 60, end: getValue('travel_int_end'), type: "annual" },
+                    { name: "Travel Parents", cost: getValue('travel_par_cost'), start: 60, end: 60 + getValue('travel_par_dur'), type: "annual" }
+                ],
+                medical: {
+                    cost: getValue('med_cost'), start: getValue('med_start'), end: getValue('med_end'),
+                    portfolio: getSelect('med_portfolio')
+                }
+            };
+
+            // Store display mode preference
+            sessionStorage.setItem('displayMode', displayMode);
+
+            try {
+                const response = await fetch('/api/generate_comprehensive_report?display_mode=' + displayMode, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    // Get the HTML and create a blob URL to navigate to
+                    const html = await response.text();
+                    const blob = new Blob([html], { type: 'text/html' });
+                    const url = URL.createObjectURL(blob);
+                    window.location.href = url;
+                } else {
+                    alert("Error generating report");
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Request failed");
+            } finally {
+                btn.textContent = "CALCULATE LIFELINE";
+                btn.disabled = false;
+            }
+        }
+
+        function calculateAgeFromDOB(prefix) {
+            const dobInput = document.getElementById(prefix + '_dob');
+            const ageInput = document.getElementById(prefix + '_age');
+
+            if (dobInput.value) {
+                const dob = new Date(dobInput.value);
+                const diff_ms = Date.now() - dob.getTime();
+                const age_dt = new Date(diff_ms);
+                const age = Math.abs(age_dt.getUTCFullYear() - 1970);
+                ageInput.value = age;
+            }
+        }
+
+        function calculateDOBFromAge(prefix) {
+            const dobInput = document.getElementById(prefix + '_dob');
+            const ageInput = document.getElementById(prefix + '_age');
+
+            if (ageInput.value) {
+                const age = parseInt(ageInput.value);
+                const currentYear = new Date().getFullYear();
+                const birthYear = currentYear - age;
+                // Set to Jan 1 of estimated birth year
+                dobInput.value = `${birthYear}-01-01`;
+            }
+        }
+
+        // Sync universal fund age to all individual fund-from fields
+        function syncUniversalFundAge(val) {
+            if (!val) return;
+            const fundFields = ['stage1_fund', 'stage2_fund', 'stage3_fund', 'boat_fund', 'caravan_fund'];
+            fundFields.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = val;
+            });
+        }
+
+        // Toggle Trips per Year visibility based on Years Between Trips
+        function toggleTravelFrequency(type) {
+            const cycleInput = document.getElementById('travel_' + type + '_cycle');
+            const freqContainer = document.getElementById('travel_' + type + '_freq_container');
+
+            if (cycleInput && freqContainer) {
+                // Only show Trips per Year when Years Between Trips is 1 (annual)
+                freqContainer.style.display = parseInt(cycleInput.value) === 1 ? 'block' : 'none';
+            }
+        }
+
+        // --- Children Management ---
+        let childCount = 0;
+        function addChild() {
+            childCount++;
+            const id = childCount;
+            const list = document.getElementById('children-list');
+            const entry = document.createElement('div');
+            entry.className = 'child-entry compact-grid';
+            entry.style.marginBottom = '10px';
+            entry.innerHTML = `
+                <div class="form-group">
+                    <label>Child Name</label>
+                    <input type="text" class="child-name" placeholder="Name">
+                </div>
+                <div class="form-group">
+                    <label>Date of Birth</label>
+                    <input type="date" class="child-dob" onchange="childDobChanged(this)">
+                </div>
+                <div class="form-group">
+                    <label>Age</label>
+                    <input type="number" class="child-age" placeholder="Auto" onchange="childAgeChanged(this)">
+                </div>
+                <div class="form-group" style="display:flex; align-items:flex-end;">
+                    <button type="button" class="btn" style="padding:4px 10px; background:#ef4444; font-size:0.8rem;" onclick="this.closest('.child-entry').remove()">Remove</button>
+                </div>
+            `;
+            list.appendChild(entry);
+        }
+
+        function childDobChanged(dobInput) {
+            const entry = dobInput.closest('.child-entry');
+            const ageInput = entry.querySelector('.child-age');
+            if (dobInput.value) {
+                const dob = new Date(dobInput.value);
+                const diff = Date.now() - dob.getTime();
+                const age = Math.abs(new Date(diff).getUTCFullYear() - 1970);
+                ageInput.value = age;
+            }
+        }
+
+        function childAgeChanged(ageInput) {
+            const entry = ageInput.closest('.child-entry');
+            const dobInput = entry.querySelector('.child-dob');
+            if (ageInput.value) {
+                const age = parseInt(ageInput.value);
+                const birthYear = new Date().getFullYear() - age;
+                dobInput.value = `${birthYear}-01-01`;
+            }
+        }
+
+        // Init Ages on page load
+        calculateAgeFromDOB('p1');
+        calculateAgeFromDOB('p2');
+
+        // Add event listeners for travel cycle changes
+        document.getElementById('travel_dom_cycle').addEventListener('change', () => toggleTravelFrequency('dom'));
+        document.getElementById('travel_int_cycle').addEventListener('change', () => toggleTravelFrequency('int'));
+
+        // Init travel frequency visibility
+        toggleTravelFrequency('dom');
+        toggleTravelFrequency('int');
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pydantic
+jinja2
+openai
+python-dotenv
+python-multipart
+email-validator
+weasyprint
+langchain-openai
+langchain-core

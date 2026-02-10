@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beresfords Life-First Planner</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Beresfords Life-First</h1>
+            <p>Map the life first, then engineer the money.</p>
+        </header>
+
+        <!-- INPUT SECTION -->
+        <div id="inputSection">
+            <form id="analysisForm">
+
+                <!-- 1. Client Profile -->
+                <div class="section-card">
+                    <h2>1. Client Profile & Financial Context</h2>
+                    <div class="form-grid">
+                        <div style="grid-column: 1 / -1; margin-bottom:5px;">
+                            <strong style="color:var(--text-secondary); font-size:0.9rem;">Partner 1</strong>
+                        </div>
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" id="p1_name" placeholder="John" value="Alex" required>
+                        </div>
+                        <div class="form-group">
+                            <label>DOB</label>
+                            <input type="date" id="p1_dob" value="1965-05-15" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Retire Age</label>
+                            <input type="number" id="p1_retire_age" value="65">
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="margin-top:10px;">
+                        <div style="grid-column: 1 / -1; margin-bottom:5px;">
+                            <strong style="color:var(--text-secondary); font-size:0.9rem;">Partner 2</strong>
+                        </div>
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" id="p2_name" placeholder="Jane" value="Sam">
+                        </div>
+                        <div class="form-group">
+                            <label>DOB</label>
+                            <input type="date" id="p2_dob" value="1968-08-20">
+                        </div>
+                        <div class="form-group">
+                            <label>Retire Age</label>
+                            <input type="number" id="p2_retire_age" value="60">
+                        </div>
+                    </div>
+
+                    <!-- NEW: STARTING CAPITAL -->
+                    <div class="full-width" style="margin-top:20px;">
+                        <h3 style="font-size:1rem; color:var(--accent-color);">Starting Capital (The Base)</h3>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Superannuation ($)</label>
+                            <input type="number" id="asset_super" value="800000">
+                        </div>
+                        <div class="form-group">
+                            <label>Cash Savings ($)</label>
+                            <input type="number" id="asset_cash" value="150000">
+                        </div>
+                        <div class="form-group">
+                            <label>Shares/Investments ($)</label>
+                            <input type="number" id="asset_shares" value="300000">
+                        </div>
+                        <div class="form-group">
+                            <label>Inv. Properties ($)</label>
+                            <input type="number" id="asset_props" value="650000">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <h2>The "Why" (True North) - Deep Discovery</h2>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label>Top 10 Don't Wants (Comma separated)</label>
+                            <textarea id="dont_wants_list" rows="3"
+                                placeholder="Stress, Debt, Conflict, ...">Stress, Debt, Conflict, Boredom, Dependence, Complexity, Illness, Isolation, Regret, Waste</textarea>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Top 10 Wants (Comma separated)</label>
+                            <textarea id="wants_list" rows="3"
+                                placeholder="Travel, Freedom, Beach House, ...">Travel, Freedom, Beach House, Generosity, Health, Creativity, Peace, Nature, Family, Learning</textarea>
+                        </div>
+                        <div class="form-group full-width">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <label>Barriers (What has stopped you?)</label>
+                                <button type="button" id="addBarrierBtn" class="btn btn-secondary"
+                                    style="font-size:0.8rem;">+ Add Barrier</button>
+                            </div>
+                            <div id="barrierList" class="dynamic-list" style="margin-top:10px;">
+                                <!-- Dynamic Barriers -->
+                            </div>
+                        </div>
+
+                        <!-- 3 EULOGIES -->
+                        <div class="form-group full-width">
+                            <h3 style="font-size:0.9rem; color:var(--text-secondary);">The Three Eulogies</h3>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Partner's Eulogy</label>
+                            <textarea id="eulogy_partner"
+                                rows="2">They were my rock and my greatest adventure companion.</textarea>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Child's Eulogy</label>
+                            <textarea id="eulogy_child"
+                                rows="2">They taught me that kindness matters more than success.</textarea>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Friend's Eulogy</label>
+                            <textarea id="eulogy_friend"
+                                rows="2">The most generous soul who always showed up.</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Big Rocks -->
+                <div class="section-card">
+                    <h2>2. The Big Rocks</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Primary Residence Val ($)</label>
+                            <input type="number" id="home_val" value="2500000" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Mortgage ($)</label>
+                            <input type="number" id="home_debt" value="450000">
+                        </div>
+                        <div class="form-group">
+                            <label>Holding Cost ($/yr)</label>
+                            <input type="number" id="home_cost" value="5000" placeholder="Rates/Ins/Maint">
+                        </div>
+                        <div class="form-group">
+                            <label>Dwelling Type</label>
+                            <select id="home_type">
+                                <option value="House">House</option>
+                                <option value="Unit">Unit/Apartment</option>
+                                <option value="Acreage">Acreage</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Location</label>
+                            <select id="home_loc">
+                                <option value="City">Capital City</option>
+                                <option value="Coastal">Coastal/Regional</option>
+                                <option value="Rural">Rural</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Growth Class</label>
+                            <select id="home_growth">
+                                <option value="Average">Average</option>
+                                <option value="High">High (Premium)</option>
+                                <option value="Low">Low (Passive)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Strategy</label>
+                            <input type="text" id="home_strat" value="Keep forever">
+                        </div>
+
+                        <!-- Holiday Home -->
+                        <div class="full-width">
+                            <h3 style="font-size:1rem; margin-top:20px; color:var(--accent-color);">Holiday Home
+                                (Optional)</h3>
+                        </div>
+                        <div class="form-group">
+                            <label>Value ($)</label>
+                            <input type="number" id="hol_val" value="950000">
+                        </div>
+                        <div class="form-group">
+                            <label>Hold Cost ($/yr)</label>
+                            <input type="number" id="hol_cost" value="8500">
+                        </div>
+
+                        <!-- Aged Care -->
+                        <div class="full-width">
+                            <h3 style="font-size:1rem; margin-top:20px; color:var(--accent-color);">Aged Care Planning
+                            </h3>
+                        </div>
+                        <div class="form-group">
+                            <label>Entry Age</label>
+                            <input type="number" id="ac_entry" value="85">
+                        </div>
+                        <div class="form-group">
+                            <label>RAD ($)</label>
+                            <input type="number" id="ac_rad" value="1000000">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NEW: Life Stages (Income) -->
+                <div class="full-width" style="margin-top:30px;">
+                    <h3 style="font-size:1.1rem; color:var(--accent-color);">Life Stages (Income Needs)</h3>
+                    <p style="font-size:0.9rem; color:var(--text-secondary);">Define your income phases (e.g. Early
+                        Active vs Late Passive).</p>
+                    <button type="button" id="addStageBtn" class="btn btn-secondary">+ Add Stage</button>
+                </div>
+                <div id="stageList" class="dynamic-list" style="margin-top:10px;">
+                    <!-- Dynamic Stages -->
+                </div>
+
+                <!-- Medical & Buffers -->
+                <div class="full-width" style="margin-top:20px;">
+                    <h3 style="font-size:1.1rem; color:var(--accent-color);">Medical & Buffers</h3>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group"><label>Medical Exp. ($/yr)</label><input type="number" id="med_cost"
+                            value="0" placeholder="Ongoing costs"></div>
+                    <div class="form-group"><label>Health Buffer ($/yr)</label><input type="number" id="health_cost"
+                            value="5000"></div>
+                    <div class="form-group"><label>Emergency Cash ($)</label><input type="number" id="emergency_res"
+                            value="50000"></div>
+                </div>
+        </div>
+
+        <!-- 3b. Assets & Travel (Granular) -->
+        <div class="section-card">
+            <h2>3b. Lifestyle Assets & Travel</h2>
+
+            <!-- Toys -->
+            <div class="full-width">
+                <h3 style="font-size:1.1rem; color:var(--accent-color);">Toys & Lumpy Assets</h3>
+            </div>
+            <div class="form-grid">
+                <div class="form-group"><label>Caravan ($)</label><input type="number" id="asset_caravan" value="0">
+                </div>
+                <div class="form-group"><label>Boat ($)</label><input type="number" id="asset_boat" value="0"></div>
+            </div>
+
+            <!-- Cars -->
+            <div class="full-width" style="margin-top:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3 style="font-size:1.1rem; color:var(--accent-color);">Transport (Cars)</h3>
+                    <button type="button" id="addCarBtn" class="btn btn-secondary">+ Add Vehicle</button>
+                </div>
+                <div id="carList" class="dynamic-list" style="margin-top:10px;"></div>
+            </div>
+
+            <!-- Travel Re-ordered: Domestic FIRST -->
+            <div class="full-width" style="margin-top:30px;">
+                <h3 style="font-size:1.1rem; color:var(--accent-color);">Travel (Domestic First)</h3>
+            </div>
+
+            <div class="form-grid">
+                <div class="full-width">
+                    <h4 style="margin:0; color:var(--text-secondary);">Domestic</h4>
+                </div>
+                <div class="form-group"><label>Days/Year</label><input type="number" id="trv_d_days" value="14"></div>
+                <div class="form-group"><label>Total Daily $</label><input type="number" id="trv_d_daily" value="500">
+                </div>
+                <div class="form-group"><label>Start Age</label><input type="number" id="trv_d_start" value="60"></div>
+                <div class="form-group"><label>End Age</label><input type="number" id="trv_d_end" value="85"></div>
+            </div>
+
+            <div class="form-grid" style="margin-top:10px;">
+                <div class="full-width">
+                    <h4 style="margin:0; color:var(--text-secondary);">International</h4>
+                </div>
+                <div class="form-group"><label>Days/Year</label><input type="number" id="trv_i_days" value="28"></div>
+                <div class="form-group"><label>Flights $/pp (Trip)</label><input type="number" id="trv_i_flight"
+                        value="2500"></div>
+                <div class="form-group"><label>Seasonality</label>
+                    <select id="trv_i_season">
+                        <option value="Peak">Peak</option>
+                        <option value="Shoulder" selected>Shoulder</option>
+                        <option value="Off-Peak">Off-Peak</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Accom $/day</label><input type="number" id="trv_i_accom" value="400">
+                </div>
+                <div class="form-group"><label>Food $/day</label><input type="number" id="trv_i_food" value="150"></div>
+                <div class="form-group"><label>Fun $/day</label><input type="number" id="trv_i_fun" value="100"></div>
+                <div class="form-group"><label>Start Age</label><input type="number" id="trv_i_start" value="60"></div>
+                <div class="form-group"><label>End Age</label><input type="number" id="trv_i_end" value="80"></div>
+            </div>
+
+            <div class="form-grid" style="margin-top:10px;">
+                <div class="full-width">
+                    <h4 style="margin:0; color:var(--text-secondary);">Other Travel</h4>
+                </div>
+                <div class="form-group"><label>To Parents ($/yr)</label><input type="number" id="trv_parents" value="0">
+                </div>
+                <div class="form-group"><label>Other ($/yr)</label><input type="number" id="trv_others" value="0"></div>
+            </div>
+
+            <!-- 4. Family & Legacy -->
+            <div class="section-card">
+                <h2>4. Family & Legacy</h2>
+
+                <div class="full-width">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3 style="font-size:1rem; color:var(--accent-color);">Weddings</h3>
+                        <button type="button" id="addWeddingBtn" class="btn btn-secondary">+ Add</button>
+                    </div>
+                    <div id="weddingList" class="dynamic-list" style="margin-top:10px;"></div>
+                </div>
+
+                <div class="full-width" style="margin-top:20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3 style="font-size:1rem; color:var(--accent-color);">Home Deposits</h3>
+                        <button type="button" id="addDepositBtn" class="btn btn-secondary">+ Add</button>
+                    </div>
+                    <div id="depositList" class="dynamic-list" style="margin-top:10px;"></div>
+                </div>
+
+                <div class="full-width" style="margin-top:20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3 style="font-size:1rem; color:var(--accent-color);">Education / Grandkids</h3>
+                        <button type="button" id="addEducationBtn" class="btn btn-secondary">+ Add</button>
+                    </div>
+                    <div id="educationList" class="dynamic-list" style="margin-top:10px;"></div>
+                </div>
+            </div>
+
+            <!-- 5. Dynamic Assumptions -->
+            <button type="button" class="accordion section-card">Deep Settings & Assumptions (Parameters)</button>
+            <div class="panel section-card"
+                style="margin-top:-20px; border-top:none; border-top-left-radius:0; border-top-right-radius:0;">
+                <div class="form-grid" style="padding-top:20px;">
+                    <div class="form-group">
+                        <label>General Inflation (%)</label>
+                        <input type="number" id="asm_inf_gen" value="3.3" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Education Inflation (%)</label>
+                        <input type="number" id="asm_inf_edu" value="8.0" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Car Depreciation (%)</label>
+                        <input type="number" id="asm_dep_car" value="15.0" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Est. Fee Load (%)</label>
+                        <input type="number" id="asm_fees" value="1.5" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Risk Profile</label>
+                        <select id="asm_risk">
+                            <option value="Conservative">Conservative</option>
+                            <option value="Moderate">Moderate</option>
+                            <option value="Balanced" selected>Balanced</option>
+                            <option value="Growth">Growth</option>
+                            <option value="High Growth">High Growth</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align:center; margin-top:40px;">
+                <button type="submit" class="btn" style="font-size:1.2rem; padding:15px 40px;">Generate Life
+                    Strategy ➞</button>
+            </div>
+
+            </form>
+        </div>
+
+        <!-- RESULTS SECTION (Hidden by default) -->
+        <div id="resultSection" style="display:none; animation: fadeIn 0.5s;">
+            <div style="text-align: right; margin-bottom: 10px;">
+                <button id="downloadPdfBtn" class="btn-secondary" onclick="downloadPDF()">Download PDF Plan</button>
+            </div>
+            <div class="section-card" style="text-align:center; border-color:var(--accent-color);">
+                <h2 style="border-bottom:none; margin-bottom:10px; color:var(--accent-color);">The Client Narrative</h2>
+                <p id="res_narrative" style="font-size:1.2rem; line-height:1.6; font-style:italic;">...</p>
+            </div>
+
+            <div class="form-grid">
+                <div class="section-card" style="text-align:center; border-color:var(--success-color);">
+                    <h3>Number 1: The Necessary Life</h3>
+                    <div id="res_num1" style="font-size:2.5rem; font-weight:700; color:var(--success-color);">$0</div>
+                    <p style="font-size:0.9rem; color:var(--text-secondary);">Dignity, Health, Independence</p>
+                </div>
+                <div class="section-card" style="text-align:center; border-color:var(--accent-color);">
+                    <h3>Number 2: The Best Life</h3>
+                    <div id="res_num2" style="font-size:2.5rem; font-weight:700; color:var(--accent-color);">$0</div>
+                    <p style="font-size:0.9rem; color:var(--text-secondary);">Full Expression, Generosity</p>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <h3>Gap Analysis</h3>
+                <p id="res_gap">...</p>
+            </div>
+
+            <!-- NEW: Bucket Architecture -->
+            <div class="section-card">
+                <h3 style="color:var(--accent-color);">Capital Architecture (The Three Buckets)</h3>
+                <div id="res_buckets" class="form-grid" style="text-align:center;">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+
+            <!-- NEW: Resilience Report -->
+            <div class="section-card" style="border-color:var(--danger-color);">
+                <h3>Resilience & Stress Test</h3>
+                <div id="res_resilience" class="dynamic-list" style="padding:0;">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+
+            <div class="section-card">
+                <h3>Fee Relativity</h3>
+                <div class="form-grid">
+                    <div>
+                        <label>Total 10y Fees</label>
+                        <div id="res_fees" style="font-size:1.5rem;">$0</div>
+                    </div>
+                    <div>
+                        <label>Total Value of Life Funded</label>
+                        <div id="res_lifefunded" style="font-size:1.5rem;">$0</div>
+                    </div>
+                    <div class="full-width">
+                        <p id="res_fee_narrative" style="margin-top:10px;">...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <h3>Assumptions Log (Transparency)</h3>
+                <pre id="res_assumptions"
+                    style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; overflow-x:auto;"></pre>
+            </div>
+
+            <div style="text-align:center; margin-top:30px;">
+                <button onclick="location.reload()" class="btn btn-secondary">Start New Plan</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="/static/script.js"></script>
+</body>
+
+</html>
