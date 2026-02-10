@@ -6,6 +6,7 @@ openai
 python-dotenv
 python-multipart
 email-validator
-
+langchain
+langchain-community
 langchain-openai
 langchain-core
